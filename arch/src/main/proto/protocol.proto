@@ -1,0 +1,7 @@
+syntax="proto3";
+
+package ru.spbau.mit;
+
+message Array {
+    repeated uint32 int = 1;
+}
