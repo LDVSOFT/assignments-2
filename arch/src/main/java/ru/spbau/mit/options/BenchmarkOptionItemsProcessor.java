@@ -6,9 +6,7 @@ import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,12 +16,11 @@ import java.util.Set;
  * Created by ldvsoft on 29.04.16.
  */
 public class BenchmarkOptionItemsProcessor extends AbstractProcessor {
-    private static final String INTERFACE_NAME = "ru.spbau.mit.options.BenchmarkOption";
-    private static final String PACKAGE_NAME = "ru.spbau.mit.options";
-    private static final String GENERATED_BASE_NAME = "BenchmarkOptionItemFactory";
-    private static final String GENERATED_NAME = PACKAGE_NAME + "." + GENERATED_BASE_NAME;
+    private static final String INTERFACE_BASE_NAME = BenchmarkOption.class.getSimpleName();
+    private static final String INTERFACE_NAME = BenchmarkOption.class.getName();
+    private static final String PACKAGE_NAME = BenchmarkOption.class.getPackage().getName();
+    private static final String GENERATED_BASE_NAME = INTERFACE_BASE_NAME + "Factory";
 
-    private Types types;
     private Elements elements;
     private Filer filer;
     private Messager messager;
@@ -43,7 +40,6 @@ public class BenchmarkOptionItemsProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        types = processingEnv.getTypeUtils();
         elements = processingEnv.getElementUtils();
         filer = processingEnv.getFiler();
         messager = processingEnv.getMessager();
@@ -78,34 +74,36 @@ public class BenchmarkOptionItemsProcessor extends AbstractProcessor {
             options.put(name, typeElement);
         }
 
-        try {
-            JavaFileObject jfo = filer.createSourceFile(GENERATED_NAME);
+        if (options.isEmpty()) {
+            return false;
+        }
 
+        try {
             TypeName mapTypeName = ParameterizedTypeName.get(
-                    ClassName.get(Map.class),
+                    ClassName.get(HashMap.class),
                     ClassName.get(String.class),
                     ClassName.get(BenchmarkOption.class)
             );
 
             CodeBlock.Builder staticBlock = CodeBlock.builder();
             for (Map.Entry<String, TypeElement> entry : options.entrySet()) {
-                staticBlock.addStatement("OPTIONS.add($S, new $T())", entry.getKey(), entry.getValue());
+                staticBlock.addStatement("OPTIONS.put($S, new $T())", entry.getKey(), entry.getValue());
             }
 
-            TypeSpec optionsClass = TypeSpec.classBuilder(ClassName.get(PACKAGE_NAME, GENERATED_BASE_NAME))
+            TypeSpec optionsClass = TypeSpec.classBuilder(GENERATED_BASE_NAME)
                     .addField(FieldSpec.builder(mapTypeName,
                             "OPTIONS",
                             Modifier.PUBLIC,
                             Modifier.STATIC,
                             Modifier.FINAL)
-                            .initializer(CodeBlock.of("new $T();", mapTypeName))
+                            .initializer(CodeBlock.of("new $T()", mapTypeName))
                             .build())
                     .addStaticBlock(staticBlock.build())
                     .build();
 
-            JavaFile jf = JavaFile.builder(PACKAGE_NAME, optionsClass)
-                    .build();
-            jf.writeTo(jfo.openWriter());
+            JavaFile.builder(PACKAGE_NAME, optionsClass)
+                    .build()
+                    .writeTo(filer);
         } catch (Exception e) {
             e.printStackTrace();
             error(null, e.getMessage());
