@@ -7,10 +7,10 @@ import java.util.concurrent.Executors;
 /**
  * Created by ldvsoft on 29.04.16.
  */
-public final class ThreadPoolTCPServer extends SynchronousTCPServer {
+public final class CachedThreadPoolTCPServer extends SynchronousTCPServer {
     private final ExecutorService pool = Executors.newCachedThreadPool();
 
-    public ThreadPoolTCPServer() throws IOException {
+    public CachedThreadPoolTCPServer() throws IOException {
         super();
     }
 

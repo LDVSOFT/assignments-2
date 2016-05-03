@@ -6,10 +6,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by ldvsoft on 28.04.16.
+ * Annotation for benchmark options to create option fabric.
+ *
+ * Requirements:
+ * 1. Can only annotate classes
+ * 2. That implement BenchmarkOption interface
+ * 3. That have constructor without parameters (may not be public if in current package)
+ * 4. That can be instantiated (not abstract)
+ * 5. `name' must be unique
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface BenchmarkOptionItem {
+@interface BenchmarkOptionItem {
     String name();
 }

@@ -61,8 +61,19 @@ public class BenchmarkOptionItemsProcessor extends AbstractProcessor {
             if (name.equals("")) {
                 error(
                         element,
-                        "Class %s has empty name is %s annotation", typeElement.getQualifiedName(),
+                        "Class %s has empty name is %s annotation",
+                        typeElement.getQualifiedName(),
                         BenchmarkOptionItem.class.getSimpleName()
+                );
+                return true;
+            }
+            if (options.containsKey(name)) {
+                error(
+                        element,
+                        "Classes %s and %s have the same option name \"%s\"",
+                        typeElement.getQualifiedName(),
+                        options.get(name).getQualifiedName(),
+                        name
                 );
                 return true;
             }
@@ -114,10 +125,6 @@ public class BenchmarkOptionItemsProcessor extends AbstractProcessor {
     }
 
     private boolean isValid(TypeElement typeElement) {
-        if (!typeElement.getModifiers().contains(Modifier.PUBLIC)) {
-            error(typeElement, "Class %s must be public", typeElement.getQualifiedName());
-            return false;
-        }
         if (typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
             error(typeElement, "Class %s must not be abstract", typeElement.getQualifiedName());
             return false;
@@ -134,16 +141,14 @@ public class BenchmarkOptionItemsProcessor extends AbstractProcessor {
         for (Element enclosed : typeElement.getEnclosedElements()) {
             if (enclosed.getKind() == ElementKind.CONSTRUCTOR) {
                 ExecutableElement executableElement = (ExecutableElement) enclosed;
-                if (executableElement.getParameters().size() == 0
-                    && executableElement.getModifiers().contains(Modifier.PUBLIC)
-                ) {
+                if (executableElement.getParameters().size() == 0) {
                     return true;
                 }
             }
         }
         error(
                 typeElement,
-                "Class %s must has public constructor without parameters",
+                "Class %s must has constructor without parameters",
                 typeElement.getQualifiedName()
         );
         return false;
