@@ -13,7 +13,8 @@
 
     <modules>
         <module>arch</module>
-        <module>app</module>
+        <module>options</module>
+        <module>gui</module>
     </modules>
 
 
@@ -36,7 +37,7 @@
                     <executions>
                         <execution>
                             <id>checkstyle</id>
-                            <phase>validate</phase>
+                            <phase>test</phase>
                             <goals>
                                 <goal>check</goal>
                             </goals>

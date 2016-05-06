@@ -8,8 +8,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>app</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>options</artifactId>
     <packaging>jar</packaging>
 
     <properties>
@@ -37,11 +36,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>3.0.0-beta-2</version>
         </dependency>
         <dependency>
             <groupId>com.squareup</groupId>

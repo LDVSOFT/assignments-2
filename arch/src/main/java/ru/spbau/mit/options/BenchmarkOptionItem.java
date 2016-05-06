@@ -13,10 +13,8 @@ import java.lang.annotation.Target;
  * 2. That implement BenchmarkOption interface
  * 3. That have constructor without parameters (may not be public if in current package)
  * 4. That can be instantiated (not abstract)
- * 5. `name' must be unique
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 @interface BenchmarkOptionItem {
-    String name();
 }

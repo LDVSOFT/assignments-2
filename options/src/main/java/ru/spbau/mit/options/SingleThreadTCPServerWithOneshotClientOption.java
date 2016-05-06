@@ -10,8 +10,13 @@ import java.io.IOException;
 /**
  * Created by ldvsoft on 04.05.16.
  */
-@BenchmarkOptionItem(name = "TCP: one-shot client connection, everything processed in single process")
+@BenchmarkOptionItem
 class SingleThreadTCPServerWithOneshotClientOption implements BenchmarkOption {
+    @Override
+    public String getName() {
+        return "TCP: one-shot client connection, everything processed in single process";
+    }
+
     @Override
     public Server getServer() throws IOException {
         return new SingleThreadTCPServer();

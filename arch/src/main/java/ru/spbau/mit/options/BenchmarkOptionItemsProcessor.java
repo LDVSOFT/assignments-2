@@ -7,10 +7,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by ldvsoft on 29.04.16.
@@ -47,7 +44,7 @@ public class BenchmarkOptionItemsProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Map<String, TypeElement> options = new HashMap<>();
+        Set<TypeElement> options = new HashSet<>();
         interfaceElement = elements.getTypeElement(INTERFACE_NAME);
 
         for (Element element : roundEnv.getElementsAnnotatedWith(BenchmarkOptionItem.class)) {
@@ -57,32 +54,12 @@ public class BenchmarkOptionItemsProcessor extends AbstractProcessor {
             }
             TypeElement typeElement = (TypeElement) element;
             BenchmarkOptionItem item = element.getAnnotation(BenchmarkOptionItem.class);
-            String name = item.name();
-            if (name.equals("")) {
-                error(
-                        element,
-                        "Class %s has empty name is %s annotation",
-                        typeElement.getQualifiedName(),
-                        BenchmarkOptionItem.class.getSimpleName()
-                );
-                return true;
-            }
-            if (options.containsKey(name)) {
-                error(
-                        element,
-                        "Classes %s and %s have the same option name \"%s\"",
-                        typeElement.getQualifiedName(),
-                        options.get(name).getQualifiedName(),
-                        name
-                );
-                return true;
-            }
             if (!isValid(typeElement)) {
                 //error printed
                 return true;
             }
 
-            options.put(name, typeElement);
+            options.add(typeElement);
         }
 
         if (options.isEmpty()) {
@@ -90,24 +67,24 @@ public class BenchmarkOptionItemsProcessor extends AbstractProcessor {
         }
 
         try {
-            TypeName mapTypeName = ParameterizedTypeName.get(
-                    ClassName.get(HashMap.class),
-                    ClassName.get(String.class),
+            TypeName setTypeName = ParameterizedTypeName.get(
+                    ClassName.get(HashSet.class),
                     ClassName.get(BenchmarkOption.class)
             );
 
             CodeBlock.Builder staticBlock = CodeBlock.builder();
-            for (Map.Entry<String, TypeElement> entry : options.entrySet()) {
-                staticBlock.addStatement("OPTIONS.put($S, new $T())", entry.getKey(), entry.getValue());
+            for (TypeElement entry : options) {
+                staticBlock.addStatement("OPTIONS.add(new $T())", entry);
             }
 
             TypeSpec optionsClass = TypeSpec.classBuilder(GENERATED_BASE_NAME)
-                    .addField(FieldSpec.builder(mapTypeName,
+                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                    .addField(FieldSpec.builder(setTypeName,
                             "OPTIONS",
                             Modifier.PUBLIC,
                             Modifier.STATIC,
                             Modifier.FINAL)
-                            .initializer(CodeBlock.of("new $T()", mapTypeName))
+                            .initializer(CodeBlock.of("new $T()", setTypeName))
                             .build())
                     .addStaticBlock(staticBlock.build())
                     .build();

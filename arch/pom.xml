@@ -9,7 +9,6 @@
     </parent>
 
     <artifactId>arch</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
